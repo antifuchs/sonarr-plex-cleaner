@@ -13,7 +13,7 @@ downloaded and watched.
 ## Installation
 
 1. Get a rust installation: https://rustup.rs/
-2. Install the CLI tool in this repo via cargo: `cargo install --git=git@github.com:antifuchs/sonarr-plex-cleaner.git`
+2. Install the CLI tool in this repo via cargo: `cargo install --git=https://github.com/antifuchs/sonarr-plex-cleaner.git`
 
 ## Prerequisites
 
