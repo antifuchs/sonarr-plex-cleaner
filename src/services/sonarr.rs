@@ -1,11 +1,12 @@
 use chrono::{DateTime, Utc};
 use reqwest;
-use reqwest::header;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
+
+use crate::config;
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
@@ -94,22 +95,22 @@ pub struct Tags {
 }
 
 impl Tags {
-    pub fn get(&self, name: String) -> Option<&Tag> {
+    pub fn get(&self, name: &str) -> Option<&Tag> {
         self.tags.iter().find(|t| t.label == name)
     }
 }
 
 impl SonarrClient {
-    pub fn new(base_url: String, api_key: String) -> Result<SonarrClient, Box<dyn Error>> {
-        let base_url = reqwest::Url::parse(&base_url)?;
-        let mut headers = header::HeaderMap::new();
-        headers.insert("X-Api-Key", header::HeaderValue::from_str(&api_key)?);
+    pub fn from_config(
+        conf: &config::ServerSettings<config::Sonarr>,
+    ) -> Result<SonarrClient, Box<dyn Error>> {
+        let (base_url, auth_headers) = conf.sonarr_base();
         let mut simple_auth = None;
         if let (username, Some(password)) = (base_url.username(), base_url.password()) {
             simple_auth = Some((username.to_string(), password.to_string()));
         }
         let client = reqwest::Client::builder()
-            .default_headers(headers)
+            .default_headers(auth_headers)
             .redirect(reqwest::RedirectPolicy::none()) // getting redirected means we're doing it wrong
             .build()?;
         Ok(SonarrClient {

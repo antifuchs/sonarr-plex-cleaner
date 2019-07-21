@@ -5,8 +5,9 @@ use std::error::Error;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::config;
+
 pub struct PlexClient {
-    token: String,
     base_url: reqwest::Url,
     client: reqwest::Client,
 }
@@ -102,16 +103,15 @@ struct TVShow {
 }
 
 impl PlexClient {
-    pub fn new(base_url: String, token: String) -> Result<PlexClient, Box<dyn Error>> {
-        let base_url = reqwest::Url::parse(&base_url)?;
+    pub fn from_config(
+        conf: &config::ServerSettings<config::Plex>,
+    ) -> Result<PlexClient, Box<dyn Error>> {
+        let (base_url, auth_headers) = conf.plex_base();
         let client = reqwest::Client::builder()
             .redirect(reqwest::RedirectPolicy::none())
+            .default_headers(auth_headers)
             .build()?;
-        Ok(PlexClient {
-            token,
-            base_url,
-            client,
-        })
+        Ok(PlexClient { base_url, client })
     }
 
     fn build_url<S: AsRef<Path>>(&self, path_bits: Vec<S>) -> reqwest::Url {
@@ -119,13 +119,9 @@ impl PlexClient {
         for bit in path_bits {
             path.push(bit);
         }
-        let mut url = self
-            .base_url
+        self.base_url
             .join(path.to_str().unwrap_or(""))
-            .expect("hoped for a valid URL");
-        url.query_pairs_mut()
-            .append_pair("X-Plex-Token", &self.token);
-        url
+            .expect("hoped for a valid URL")
     }
 
     pub fn libraries(&self) -> Result<Vec<Directory>, Box<dyn Error>> {
