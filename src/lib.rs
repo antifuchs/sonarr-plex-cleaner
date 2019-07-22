@@ -2,9 +2,7 @@
 //!
 //! Sonarr Plex Cleaner Cli
 
-#![deny(warnings,
-        // missing_docs,
-        trivial_casts, unused_qualifications)]
+#![deny(warnings, missing_docs, trivial_casts, unused_qualifications)]
 #![forbid(unsafe_code)]
 
 pub mod application;
