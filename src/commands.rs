@@ -1,14 +1,4 @@
-//! Sonarr Plex Cleaner Cli Subcommands
-//!
-//! This is where you specify the subcommands of your application.
-//!
-//! The default application comes with two subcommands:
-//!
-//! - `start`: launches the application
-//! - `version`: print application version
-//!
-//! See the `impl Configurable` below for how to specify the path to the
-//! application's configuration file.
+//! Sonarr Plex Cleaner CLI Subcommands
 
 mod tv;
 mod version;
@@ -20,7 +10,7 @@ use abscissa_core::{Command, Configurable, FrameworkError, Help, Options, Runnab
 use dirs::{config_dir, home_dir};
 use std::path::PathBuf;
 
-/// Sonarr Plex Cleaner config file
+/// Sonarr Plex Cleaner config file name.
 pub const CONFIG_FILE: &str = "sonarr-plex-cleaner.toml";
 
 /// Sonarr Plex Cleaner Cli Subcommands
@@ -30,7 +20,7 @@ pub enum SonarrPlexCleanerCliCommand {
     #[options(help = "get usage information")]
     Help(Help<Self>),
 
-    /// The `tv` subcommand for TV seasons
+    /// The `tv` subcommand for cleaning out watched TV seasons
     #[options(help = "clean up TV seasons in sonarr&plex")]
     Tv(TVCommand),
 
@@ -39,7 +29,10 @@ pub enum SonarrPlexCleanerCliCommand {
     Version(VersionCommand),
 }
 
-/// This trait allows you to define how application configuration is loaded.
+/// The way we load the CLI file:
+///
+/// The config file is mandatory, and we search for it in the OS's
+/// appropriate `config_dir` (if unknown, the `home_dir`).
 impl Configurable<SonarrPlexCleanerCliConfig> for SonarrPlexCleanerCliCommand {
     /// Location of the configuration file
     fn config_path(&self) -> Option<PathBuf> {
@@ -52,6 +45,7 @@ impl Configurable<SonarrPlexCleanerCliConfig> for SonarrPlexCleanerCliCommand {
         ))
     }
 
+    /// Override config settings from the commandline.
     fn process_config(
         &self,
         config: SonarrPlexCleanerCliConfig,

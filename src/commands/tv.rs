@@ -1,4 +1,4 @@
-//! `start` subcommand - example of how to write a subcommand
+//! `tv` subcommand - cleans out entirely-watched TV seasons.
 
 use crate::config::SonarrPlexCleanerCliConfig;
 use crate::prelude::*;
@@ -10,8 +10,6 @@ use byte_unit::{Byte, ByteUnit};
 use chrono::Utc;
 use humantime::{format_duration, Duration};
 use std::collections::HashMap;
-/// App-local prelude includes `app_reader()`/`app_writer()`/`app_config()`
-/// accessors along with logging macros. Customize as you see fit.
 use std::collections::HashSet;
 
 use crate::services::{plex, sonarr};

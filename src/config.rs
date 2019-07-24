@@ -1,4 +1,4 @@
-//! Sonarr Plex Cleaner Cli Config
+//! Sonarr Plex Cleaner CLI Config
 
 use abscissa_core::Config;
 use reqwest::{
@@ -31,7 +31,7 @@ pub enum Plex {}
 #[derive(Clone, PartialEq, Debug)]
 pub enum Sonarr {}
 
-/// Sonarr Plex Cleaner Cli Configuration. Does not support
+/// Sonarr Plex Cleaner CLI Configuration. Does not support
 /// serializing back to the config file.
 #[derive(Clone, Config, Debug, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
