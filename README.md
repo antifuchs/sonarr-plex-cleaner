@@ -33,17 +33,43 @@ seasons it would clean up.
 
 If you wish to prevent the CLI from deleting a show you want to keep
 around, tag the show (you can do this in sonarr's "Edit" screen for
-the show). By default, the tag name `retain` will prevent the show
-from being garbage-collectable.
+the show). You can use a tag named `retain` to indicate that the show
+is manually managed.
+
+## The configuration file
+
+`sonarr-plex-cleaner` reads all this data from a configuration file;
+on Linux, it lives in `~/.config/sonarr-plex-cleaner.yaml`; on macOS,
+it lives in `~/Library/Preferences/sonarr-plex-cleaner.toml`. Create
+the appropriate file for your platform, with contents like the
+following:
+
+``` toml
+[tv]
+url = "https://sonarr.example.com/api/"  # Your sonarr installation's API URL
+api_key = "deadbeef5ec9e7"               # sonarr API key
+
+[plex]
+url = "http://plex.example.com:32400/"   # Your plex API URL
+api_key = "deadbeef5ec9e7"               # Plex API key
+
+
+[retention]
+# Tag that marks a show as manually managed
+retain_tag = "retain"
+
+# Wait 14 days after last air date before deleting even a completely watched show:
+retain_duration = "14d"
+```
 
 ## Usage
 
-You've collected the four items from prerequisites, and have tagged
-the shows that you wish to keep. Great, let's see what it would
-delete:
+You've collected the four items from prerequisites, made the
+configuration file and have tagged the shows that you wish to
+keep. Great, let's see what it would delete:
 
 ``` sh
-sonarr-plex-cleaner --sonarr=https://sonarr.example.com/api/ --sonarr-api-key=ffffffffffff --plex http://plex.example.com:32400/ --plex-api-key=fffffffffffff
+sonarr-plex-cleaner tv
 ```
 
 which will output something like:
@@ -58,7 +84,7 @@ INFO [sonarr_plex_cleaner] delete 7 files: Piracy On The High Seas S04: 9.05 GiB
 Run:
 
 ``` sh
-sonarr-plex-cleaner --sonarr=https://sonarr.example.com/api/ --sonarr-api-key=ffffffffffff --plex http://plex.example.com:32400/ --plex-api-key=fffffffffffff --delete-files
+sonarr-plex-cleaner tv --delete-files
 ```
 
 to unmonitor each of the seasons above in Plex, and delete the files in that season.
