@@ -133,9 +133,7 @@ impl Runnable for TVCommand {
                                     series.title,
                                     season.season_number,
                                     format_duration(
-                                        (Utc::now() - air + retain_duration)
-                                            .to_std()
-                                            .expect("duration out of range")
+                                        (Utc::now() - air).to_std().expect("duration out of range")
                                     ),
                                     format_duration(
                                         retain_duration.to_std().expect("duration out of range")
