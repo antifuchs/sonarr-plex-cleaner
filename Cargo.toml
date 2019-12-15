@@ -28,11 +28,11 @@ version = "stable"
 
 [dependencies]
 failure = "0.1"
-gumdrop = "0.6"
+gumdrop = "0.7.0"
 lazy_static = "1"
 serde = { version = "1", features = ["serde_derive"] }
-secrecy = "0.2.2"
-zeroize = "0.9.3"
+secrecy = {version = "0.6.0", features = ["serde"] }
+zeroize = { version = "1.1.0", features = ["alloc"] }
 reqwest = "0.9.17"
 url_serde = "0.2.0"
 dirs = "2.0.1"
@@ -44,8 +44,8 @@ serde-xml-rs = "0.3.1"
 chrono = { version = "0.4.6", features = ["serde"] }
 
 [dependencies.abscissa_core]
-version = "0.2.0"
+version = "0.4.0"
 
 [dev-dependencies.abscissa_core]
-version = "0.2.0"
+version = "0.4.0"
 features = ["testing"]

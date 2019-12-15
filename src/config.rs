@@ -11,10 +11,15 @@ use std::marker::PhantomData;
 use std::time::Duration;
 use zeroize::Zeroize;
 
-#[derive(PartialEq, Eq, Clone, Zeroize, Default, Debug, Deserialize, Serialize)]
-#[zeroize(drop)]
+#[derive(PartialEq, Eq, Clone, Default, Debug, Deserialize, Serialize)]
 /// Represents an API key.
 pub struct APIKey(String);
+
+impl Zeroize for APIKey {
+    fn zeroize(&mut self) {
+        self.0.zeroize()
+    }
+}
 
 impl CloneableSecret for APIKey {}
 impl DebugSecret for APIKey {
