@@ -1,7 +1,10 @@
 //! The Sonarr media indexer & broadcatcher API.
 
+use crate::prelude::*;
+
 use chrono::{DateTime, Utc};
 use reqwest;
+use retry::{delay::Exponential, retry};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -311,9 +314,34 @@ impl SonarrClient {
                 .to_str()
                 .unwrap(),
         )?;
-        let mut req = self.client.delete(url);
+        let mut req = self.client.delete(url.clone());
         req = self.add_auth(req);
-        let _response = req.send()?.error_for_status()?;
-        Ok(())
+        match req.send()? {
+            resp if resp.status().is_success() => Ok(()),
+            resp if resp.status().is_server_error() => {
+                // retry on failure and don't worry if the file is gone already:
+                retry(Exponential::from_millis(200), || {
+                    info!(
+                        "HTTP DELETE failed with status {:?}. Retrying...",
+                        resp.status()
+                    );
+                    let mut req = self.client.delete(url.clone());
+                    req = self.add_auth(req);
+                    match req.send()? {
+                        resp if resp.status().is_success()
+                            || resp.status() == reqwest::StatusCode::NOT_FOUND =>
+                        {
+                            Ok(())
+                        }
+                        resp => resp.error_for_status().map(|_| ()),
+                    }
+                })?;
+                Ok(())
+            }
+            resp => {
+                resp.error_for_status().map(|_| ())?;
+                Ok(())
+            }
+        }
     }
 }
