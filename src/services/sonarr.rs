@@ -138,7 +138,6 @@ pub struct EpisodeFile {
 pub struct SonarrClient {
     client: reqwest::Client,
     base_url: reqwest::Url,
-    simple_auth: Option<(String, String)>,
 }
 
 /// A Sonarr tag.
@@ -180,44 +179,26 @@ impl SonarrClient {
         conf: &config::ServerSettings<config::Sonarr>,
     ) -> Result<SonarrClient, Box<dyn Error>> {
         let (base_url, auth_headers) = conf.sonarr_base();
-        let mut simple_auth = None;
-        if let (username, Some(password)) = (base_url.username(), base_url.password()) {
-            simple_auth = Some((username.to_string(), password.to_string()));
-        }
         let client = reqwest::Client::builder()
             .default_headers(auth_headers)
             .redirect(reqwest::RedirectPolicy::none()) // getting redirected means we're doing it wrong
             .build()?;
-        Ok(SonarrClient {
-            client,
-            base_url,
-            simple_auth,
-        })
+        Ok(SonarrClient { client, base_url })
     }
 
     /// Returns all tags known to Sonarr.
     pub fn fetch_tags(&self) -> Result<Tags, Box<dyn Error>> {
         let url = self.base_url.join("tag")?;
-        let mut req = self.client.get(url);
-        req = self.add_auth(req);
+        let req = self.client.get(url);
         let mut response = req.send()?.error_for_status()?;
         let tags: Vec<Tag> = response.json()?;
         Ok(Tags { tags })
     }
 
-    /// Add HTTP simple auth to a request to the Sonarr API.
-    fn add_auth(&self, req: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
-        if let Some((user, pass)) = &self.simple_auth {
-            return req.basic_auth(user, Some(pass));
-        }
-        req
-    }
-
     /// Fetches all the TV series that Sonarr knows about.
     pub fn fetch_all_series(&self) -> Result<Vec<Series>, Box<dyn Error>> {
         let url = self.base_url.join("series")?;
-        let mut req = self.client.get(url);
-        req = self.add_auth(req);
+        let req = self.client.get(url);
         let mut response = req.send()?.error_for_status()?;
         let series: Vec<Series> = response.json()?;
         Ok(series)
@@ -231,8 +212,7 @@ impl SonarrClient {
                 .to_str()
                 .unwrap(),
         )?;
-        let mut req = self.client.get(url);
-        req = self.add_auth(req);
+        let req = self.client.get(url);
         let mut response = req.send()?.error_for_status()?;
         Ok(response.json()?)
     }
@@ -245,8 +225,7 @@ impl SonarrClient {
                 .to_str()
                 .unwrap(),
         )?;
-        let mut req = self.client.put(url).body(serde_json::to_vec(&series)?);
-        req = self.add_auth(req);
+        let req = self.client.put(url).body(serde_json::to_vec(&series)?);
         let mut response = req.send()?.error_for_status()?;
         Ok(response.json()?)
     }
@@ -256,8 +235,7 @@ impl SonarrClient {
         let url = self
             .base_url
             .join(&format!("episodefile?seriesId={}", series_id))?;
-        let mut req = self.client.get(url);
-        req = self.add_auth(req);
+        let req = self.client.get(url);
 
         let mut response = req.send()?.error_for_status()?;
         let epfiles: Vec<EpisodeFile> = response.json()?;
@@ -314,8 +292,7 @@ impl SonarrClient {
                 .to_str()
                 .unwrap(),
         )?;
-        let mut req = self.client.delete(url.clone());
-        req = self.add_auth(req);
+        let req = self.client.delete(url.clone());
         match req.send()? {
             resp if resp.status().is_success() => Ok(()),
             resp if resp.status().is_server_error() => {
@@ -325,8 +302,7 @@ impl SonarrClient {
                         "HTTP DELETE failed with status {:?}. Retrying...",
                         resp.status()
                     );
-                    let mut req = self.client.delete(url.clone());
-                    req = self.add_auth(req);
+                    let req = self.client.delete(url.clone());
                     match req.send()? {
                         resp if resp.status().is_success()
                             || resp.status() == reqwest::StatusCode::NOT_FOUND =>
