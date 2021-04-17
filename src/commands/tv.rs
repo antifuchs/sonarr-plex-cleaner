@@ -86,7 +86,7 @@ impl Runnable for TVCommand {
             .filter_map(|series| {
                 if let Some((name, id)) = &retain_tag {
                     if series.tags.contains(&id) {
-                        debug!("Skipping {} because tagged {:?}", series.title, name);
+                        debug!("Skipping {} because it is tagged {:?}", series.title, name);
                         return None;
                     }
                 }
@@ -110,7 +110,7 @@ impl Runnable for TVCommand {
                             .is_none();
                         if is_watched {
                             debug!(
-                                "Skipping {} - Season {:?} because unwatched",
+                                "Skipping {} - Season {:?} because it is unwatched",
                                 series.title, season.season_number
                             );
                             return None;
@@ -120,7 +120,7 @@ impl Runnable for TVCommand {
                             // season isn't done airing yet / isn't old enough:
                             if season.statistics.previous_airing.is_some() {
                                 info!(
-                                    "Skipping {} - Season {:?} because still airing",
+                                    "Skipping {} - Season {:?} because it is still airing",
                                     series.title, season.season_number
                                 );
                             }
