@@ -32,6 +32,10 @@ impl DebugSecret for APIKey {
 #[derive(Clone, PartialEq, Debug)]
 pub enum Plex {}
 
+/// Marker for Jellyfin server settings.
+#[derive(Clone, PartialEq, Debug)]
+pub enum Jellyfin {}
+
 /// Marker for Sonarr server settings.
 #[derive(Clone, PartialEq, Debug)]
 pub enum Sonarr {}
@@ -45,12 +49,44 @@ pub struct SonarrPlexCleanerCliConfig {
     /// from Settings -> General.
     pub tv: ServerSettings<Sonarr>,
 
-    /// Settings for the media viewing application (Plex). See Plex
-    /// help: https://bit.ly/2p7RtOu for API key instructions.
-    pub plex: ServerSettings<Plex>,
+    /// Settings for the media-viewing application to consider when
+    /// looking at viewed states.
+    #[serde(flatten)]
+    pub viewer: Viewer,
 
     /// Settings that govern the retention policy.
     pub retention: RetentionSettings,
+}
+
+/// Settings for the media-viewing application to consider when looking at viewed states.
+#[derive(Clone, Debug, Deserialize)]
+pub enum Viewer {
+    /// Settings for the Plex media server. See Plex help:
+    /// https://bit.ly/2p7RtOu for API key instructions.
+    Plex(ServerSettings<Plex>),
+
+    /// Settings for the Jellyfin and Emby media servers. Use the
+    /// admin dashboard / API keys to generate an API key.
+    Jellyfin(JellyfinSettings),
+}
+
+impl Default for Viewer {
+    fn default() -> Self {
+        Viewer::Plex(Default::default())
+    }
+}
+
+/// Settings for the jellyfin app: These consist of a server
+/// configuration (URL and API key) and a user to consider for watched
+/// states.
+#[derive(Default, Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct JellyfinSettings {
+    /// Username to consider when looking at watched states.
+    pub user: String,
+
+    /// Server (API key and base URL) to connect to.
+    pub server: ServerSettings<Jellyfin>,
 }
 
 /// Server settings. These are common across all media management

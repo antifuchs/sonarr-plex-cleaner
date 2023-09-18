@@ -1,6 +1,7 @@
 //! `tv` subcommand - cleans out entirely-watched TV seasons.
 
 use crate::config::SonarrPlexCleanerCliConfig;
+use crate::config::Viewer;
 use crate::prelude::*;
 
 use abscissa_core::config::Override;
@@ -67,15 +68,21 @@ impl Runnable for TVCommand {
         });
         let retain_duration = chrono::Duration::from_std(config.retention.retain_duration)
             .expect("Weird retain duration (past max chrono duration?)");
-        let plex =
-            plex::PlexClient::from_config(&config.plex).expect("Could not set up plex client");
-        let watched_seasons: HashSet<(String, String)> = plex
-            .all_tv_seasons()
-            .expect("plex season listing")
-            .into_iter()
-            .filter(|s| s.fully_watched())
-            .map(|s| (s.show_name, s.title))
-            .collect();
+        let watched_seasons: HashSet<(String, String)> = match &config.viewer {
+            Viewer::Plex(plex) => {
+                let plex =
+                    plex::PlexClient::from_config(&plex).expect("Could not set up plex client");
+                plex.all_tv_seasons()
+                    .expect("plex season listing")
+                    .into_iter()
+                    .filter(|s| s.fully_watched())
+                    .map(|s| (s.show_name, s.title))
+                    .collect()
+            }
+            Viewer::Jellyfin(jf) => {
+                todo!("jellyfin {:?} on {:?}", jf.user, jf.server);
+            }
+        };
 
         let serieses = sonarr
             .fetch_all_series()
