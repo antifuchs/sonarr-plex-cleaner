@@ -63,10 +63,12 @@ pub struct SonarrPlexCleanerCliConfig {
 pub enum Viewer {
     /// Settings for the Plex media server. See Plex help:
     /// https://bit.ly/2p7RtOu for API key instructions.
+    #[serde(rename = "plex")]
     Plex(ServerSettings<Plex>),
 
     /// Settings for the Jellyfin and Emby media servers. Use the
     /// admin dashboard / API keys to generate an API key.
+    #[serde(rename = "jellyfin")]
     Jellyfin(JellyfinSettings),
 }
 

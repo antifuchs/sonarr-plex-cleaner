@@ -30,7 +30,7 @@ version = "stable"
 failure = "0.1"
 gumdrop = "0.7.0"
 lazy_static = "1"
-serde = { version = "1", features = ["serde_derive"] }
+serde = { version = "1.0.188", features = ["serde_derive"] }
 secrecy = {version = "0.6.0", features = ["serde"] }
 zeroize = { version = "1.1.0", features = ["alloc"] }
 reqwest = "0.9.17"
