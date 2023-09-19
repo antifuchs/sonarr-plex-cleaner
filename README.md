@@ -17,12 +17,20 @@ downloaded and watched.
 
 ## Prerequisites
 
-You need to have Sonarr and Plex running. From them, you'll need:
+You need to have Sonarr and a media server (Plex or Jellyfin) running.
+From them, you'll need:
 
 * Your Sonarr API's base URL. This is usually the URL that you use to reach Sonarr, plus `/api`.
-* Your Plex server's URL. Use the one that you use to reach the Plex Web server.
 * Your Sonarr API key. You can find it in `Settings -> General`.
+
+If you're running Plex,
+* Your Plex server's URL. Use the one that you use to reach the Plex Web server.
 * Your Plex API key. Find it via this article: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
+
+If you're running emby or jellyfin (I have only tested with the latter),
+* Your jellyfin server's URL. Use the base URL that you use to reach the jellyfin server on.
+* A jellyfin API token. An admin can make one for you
+* The username whose watched states you want to consider.
 
 ## Planning to use this tool
 
@@ -49,10 +57,14 @@ following:
 url = "https://sonarr.example.com/api/"  # Your sonarr installation's API URL
 api_key = "deadbeef5ec9e7"               # sonarr API key
 
+# Either [plex] or [jellyfin] - delete the one that doesn't apply to you:
 [plex]
 url = "http://plex.example.com:32400/"   # Your plex API URL
 api_key = "deadbeef5ec9e7"               # Plex API key
-
+[jellyfin]
+url = "http://jellyfin.example.com:8096/" # your jellyfin API URL
+api_key = "aaaaaaaaaaaaaaaaaaaa"          # Jellyfin API key
+user = "your_username"                    # User to consider for watched states
 
 [retention]
 # Tag that marks a show as manually managed
@@ -87,4 +99,4 @@ Run:
 sonarr-plex-cleaner tv --delete-files
 ```
 
-to unmonitor each of the seasons above in Plex, and delete the files in that season.
+to unmonitor each of the seasons above in Sonarr, and delete the files in that season.
