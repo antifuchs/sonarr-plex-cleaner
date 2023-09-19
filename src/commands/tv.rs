@@ -3,6 +3,7 @@
 use crate::config::SonarrPlexCleanerCliConfig;
 use crate::config::Viewer;
 use crate::prelude::*;
+use crate::services::jellyfin;
 
 use abscissa_core::config::Override;
 use abscissa_core::FrameworkError;
@@ -79,8 +80,15 @@ impl Runnable for TVCommand {
                     .map(|s| (s.show_name, s.title))
                     .collect()
             }
-            Viewer::Jellyfin(jf) => {
-                todo!("jellyfin {:?} on {:?}", jf.user, jf.server);
+            Viewer::Jellyfin(conf) => {
+                let jf = jellyfin::JellyfinClient::from_config(conf)
+                    .expect("Could not set up jellyfin/emby client");
+                jf.all_tv_seasons()
+                    .expect("Listing seasons")
+                    .into_iter()
+                    .filter(|s| s.fully_watched())
+                    .map(|s| (s.series_name, s.name))
+                    .collect()
             }
         };
 

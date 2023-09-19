@@ -167,3 +167,19 @@ pub struct RetentionSettings {
     #[serde(with = "serde_humantime", default)]
     pub retain_duration: Duration,
 }
+
+impl ServerSettings<Jellyfin> {
+    /// Returns a URL and request headers that allow making requests
+    /// to a jellyfin server.
+    pub fn jellyfin_base(&self) -> (Url, HeaderMap) {
+        (
+            self.url.clone(),
+            vec![(
+                HeaderName::from_static("x-emby-token"),
+                HeaderValue::from_str(&self.api_key.expose_secret().0).unwrap(),
+            )]
+            .into_iter()
+            .collect(),
+        )
+    }
+}
