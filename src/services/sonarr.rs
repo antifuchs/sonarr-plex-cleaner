@@ -225,7 +225,7 @@ impl SonarrClient {
                 .to_str()
                 .unwrap(),
         )?;
-        let req = self.client.put(url).body(serde_json::to_vec(&series)?);
+        let req = self.client.put(url).json(&series);
         let mut response = req.send()?.error_for_status()?;
         Ok(response.json()?)
     }
